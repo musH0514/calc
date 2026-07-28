@@ -288,7 +288,7 @@ uutoq(FULL inum, FULL iden)
 NUMBER *
 iitoq(long inum, long iden)
 {
-    register NUMBER *q;
+    register NUMBER *q;   //register表示建议将q放入寄存器
     long d;
     bool sign;
 
@@ -366,8 +366,8 @@ qqadd(NUMBER *q1, NUMBER *q2)
      * If the denominators are relatively prime, then the answer is the
      * straightforward cross product result with no need for reduction.
      */
-    zgcd(q1->den, q2->den, &d1);
-    if (zisunit(d1)) {
+    zgcd(q1->den, q2->den, &d1);   //最大公因数
+    if (zisunit(d1)) {   //最大公因数为1，互质
         zfree(d1);
         zmul(q1->num, q2->den, &t1);
         zmul(q1->den, q2->num, &t2);
