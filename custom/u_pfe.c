@@ -1030,14 +1030,13 @@ list_fd_get(LIST *in, fd_set *fds)
 {
     VALUE *out;
     LISTELEM *el;
-    int s = 0;
     int i;
     VALUE o;
 
     out = alloc_list(listalloc());
     el = in->l_first;
 
-    for (; el != NULL; el = el->e_next, s++) {
+    for (; el != NULL; el = el->e_next) {
         i = qtoi(el->e_value.v_num);
         if (FD_ISSET(i, fds)) {
             copyvalue(&el->e_value, &o);
@@ -1639,12 +1638,14 @@ static char *
 strext(char **subject, char *with)
 {
     size_t n;
+    char *newsubject;
 
     n = strlen(*subject) + strlen(with);
-    if ((*subject = realloc(*subject, n + 1)) == NULL) {
-        free(*subject);
+    newsubject = realloc(*subject, n + 1);
+    if (newsubject == NULL) {
         return NULL;
     }
+    *subject = newsubject;
     private_strlcat(*subject, with, n + 1);
 
     return *subject;
@@ -1729,7 +1730,9 @@ u_pfe_pread(char *UNUSED(name), int count, VALUE **vals)
             }
             if (r) {
                 ob[r] = '\0';
-                strext(&o, ob);
+                if (strext(&o, ob) == NULL) {
+                    math_error("%s: " __FILE__ ": %d: unable to extend stdout", custname, __LINE__);
+                }
             } else {
                 if (close(out)) {
                     pco = errno;
@@ -1746,7 +1749,9 @@ u_pfe_pread(char *UNUSED(name), int count, VALUE **vals)
             }
             if (r) {
                 eb[r] = '\0';
-                strext(&e, eb);
+                if (strext(&e, eb) == NULL) {
+                    math_error("%s: " __FILE__ ": %d: unable to extend stderr", custname, __LINE__);
+                }
             } else {
                 if (close(err)) {
                     pce = errno;
